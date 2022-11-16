@@ -145,6 +145,10 @@ class QtmWrapper(Thread):
                 cf_trackingLoss = 0
         else:
             cf_trackingLoss += 1
+    
+    def getpose(self):
+        global cf_pose
+        return cf_pose
 
         # Get 6DOF data for controllers and update globals
 
