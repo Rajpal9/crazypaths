@@ -109,7 +109,7 @@ def run_sequence(scf):
         t = t_now-t_in
         print(t)
         
-        rd,_,_ = path_pars(t-t_lift,t_end,c = 0.1,tilt=0,rd_init = r_init,shape = 'lissajous')
+        rd,_,_ = path_pars(t-t_lift,t_end,c = 0.2,tilt=0,rd_init = r_init,shape = 'lissajous')
         print('Setting position {},time {}'.format(rd,t))
    
         if t < t_lift:
@@ -119,21 +119,21 @@ def run_sequence(scf):
                                                     r_init[2],
                                                     0)
                 time.sleep(0.001)
-        elif t < 2*t_end + 0.5:
+        elif t < 2*t_end + t_lift:
             for i in range(10):
                 cf.commander.send_position_setpoint(rd[0],
                                                 rd[1],
                                                 hieght,
                                                 0)
                 time.sleep(0.001)
-        elif t < 2*t_end + 1:
+        elif t < 2*t_end + t_lift + 1:
             for i in range(10):
                 cf.commander.send_position_setpoint(r_init[0],
                                                     r_init[1],
                                                     0.05,
                                                     0)
                 time.sleep(0.001)
-        elif t >= 3*t_end + 1:
+        elif t >= 2*t_end + t_lift + 1:
             break
 
 
