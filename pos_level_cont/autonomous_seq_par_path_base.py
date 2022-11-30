@@ -13,13 +13,12 @@ from paths import path_pars
 uri = uri_helper.uri_from_env(default='radio://0/80/2M/E7E7E7E701')
 
 path_np = np.array(np.genfromtxt('/home/rajpal/CF programs/crazypaths/paths/circle_waypoints.csv',delimiter=',', skip_header=1, dtype=float).tolist())
-import time
 # sequence = path_np[:,1:]
 
-t_end = 15
-hieght = 0.3
+t_end = 20
+hieght = 0.4
 r_init = np.array([0,0,hieght])
-
+t_lift = 2
 # Change the sequence according to your setup
 #             x    y    z  YAW
 # sequence = [
@@ -38,7 +37,7 @@ r_init = np.array([0,0,hieght])
 def wait_for_position_estimator(scf):
     print('Waiting for estimator to find position...')
 
-    log_config = LogConfig(name='Kalman Variance', period_in_ms=100)
+    log_config = LogConfig(name = 'Kalman Variance', period_in_ms = 10)
     log_config.add_variable('kalman.varPX', 'float')
     log_config.add_variable('kalman.varPY', 'float')
     log_config.add_variable('kalman.varPZ', 'float')
@@ -93,7 +92,7 @@ def position_callback(timestamp, data, logconf):
 
 
 def start_position_printing(scf):
-    log_conf = LogConfig(name='Position', period_in_ms=100)
+    log_conf = LogConfig(name='Position', period_in_ms=10)
     log_conf.add_variable('kalman.stateX', 'float')
     log_conf.add_variable('kalman.stateY', 'float')
     log_conf.add_variable('kalman.stateZ', 'float')
@@ -105,36 +104,36 @@ def start_position_printing(scf):
 
 def run_sequence(scf):
     cf = scf.cf
-    for i in range(1000):
+    while True:
         t_now = time.time()
         t = t_now-t_in
         print(t)
-        rd,_,_ = path_pars(t,t_end,c = 0.2,tilt=0,rd_init = r_init,shape = 'circle')
-        print('Setting position {},time {}, iteration {}'.format(rd,t,i))
+        
+        rd,_,_ = path_pars(t-t_lift,t_end,c = 0.1,tilt=0,rd_init = r_init,shape = 'lissajous')
+        print('Setting position {},time {}'.format(rd,t))
    
-        if t < 0.5:
+        if t < t_lift:
             for i in range(10):
                 cf.commander.send_position_setpoint(r_init[0],
                                                     r_init[1],
                                                     r_init[2],
                                                     0)
-                time.sleep(0.01)
-        elif t < t_end + 0.5:
+                time.sleep(0.001)
+        elif t < 2*t_end + 0.5:
             for i in range(10):
-                
                 cf.commander.send_position_setpoint(rd[0],
-                                                    rd[1],
-                                                    hieght,
-                                                    0)
-                time.sleep(0.01)
-        elif t < t_end + 1:
+                                                rd[1],
+                                                hieght,
+                                                0)
+                time.sleep(0.001)
+        elif t < 2*t_end + 1:
             for i in range(10):
                 cf.commander.send_position_setpoint(r_init[0],
                                                     r_init[1],
                                                     0.05,
                                                     0)
-                time.sleep(0.01)
-        elif t >= t_end + 1:
+                time.sleep(0.001)
+        elif t >= 3*t_end + 1:
             break
 
 
