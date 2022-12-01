@@ -41,9 +41,11 @@ CF_BODY = 'cf'
 # ]
 
 # path parameters
-t_end = 20
-hieght = 0.4
-t_lift = 2
+t_end = 10
+hieght = 0.5000
+t_lift = 5
+t_land = 1
+n_iters = 2
 
 
 deck_attached_event = Event()
@@ -196,7 +198,7 @@ def run_sequence(scf):
         t = t_now-t_in
         print(t)
         
-        rd,_,_ = path_pars(t-t_lift,t_end,c = 0.2,tilt=0,rd_init = r_init,shape = 'lissajous')
+        rd,_,_ = path_pars(t-t_lift,t_end,c = 0.6,tilt=0,rd_init = r_init,shape = 'circle')
         print('Setting position {},time {}'.format(rd,t))
    
         if t < t_lift:
@@ -206,21 +208,21 @@ def run_sequence(scf):
                                                     r_init[2],
                                                     0)
                 time.sleep(0.001)
-        elif t < 2*t_end + t_lift:
+        elif t < n_iters*t_end + t_lift:
             for i in range(10):
                 cf.commander.send_position_setpoint(rd[0],
                                                 rd[1],
                                                 hieght,
                                                 0)
                 time.sleep(0.001)
-        elif t < 2*t_end + t_lift + 1:
+        elif t < n_iters*t_end + t_lift + t_land:
             for i in range(10):
                 cf.commander.send_position_setpoint(r_init[0],
                                                     r_init[1],
                                                     0.05,
                                                     0)
                 time.sleep(0.001)
-        elif t >= 2*t_end + t_lift + 1:
+        elif t >= 2*t_end + t_lift + t_land:
             break
 
 
